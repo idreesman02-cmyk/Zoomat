@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Google AI Studio App</title>
+  </head>
+  <body>
+    <script>
+      (function() {
+        var fallback = {};
+        var restricted = ['fetch', 'location', 'history', 'navigator'];
+        
+        function createHandler(target) {
+          return {
+            get: function(t, prop) {
+              if (prop === 'global' || prop === 'self' || prop === 'window' || prop === 'globalThis') {
+                return window.global;
+              }
+              if (prop in fallback) return fallback[prop];
+              var value = t[prop];
+              if (typeof value === 'function' && t === window) {
+                if (value.prototype && value.prototype.constructor === value) return value;
+                try {
+                  return value.bind(window);
+                } catch (e) {
+                  return value;
+                }
+              }
+              return value;
+            },
+            set: function(t, prop, value) {
+              if (restricted.indexOf(prop) !== -1) {
+                fallback[prop] = value;
+                return true;
+              }
+              try {
+                t[prop] = value;
+              } catch (e) {
+                fallback[prop] = value;
+              }
+              return true;
+            },
+            has: function(t, prop) {
+              return prop in fallback || prop in t;
+            }
+          };
+        }
+
+        var proxy = new Proxy(window, createHandler(window));
+
+        try {
+          Object.defineProperty(window, 'global', {
+            value: proxy,
+            configurable: true,
+            writable: true
+          });
+          Object.defineProperty(window, 'globalThis', {
+            value: proxy,
+            configurable: true,
+            writable: true
+          });
+        } catch (e) {
+          window.global = proxy;
+          window.globalThis = proxy;
+        }
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

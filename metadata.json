@@ -1,0 +1,6 @@
+{
+  "name": "MeetLite Pro",
+  "description": "A scalable real-time video conferencing platform with WebRTC SFU-like architecture, screen sharing, and professional grid UI.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["real-time-video", "screen-sharing", "host-controls"]
+}
